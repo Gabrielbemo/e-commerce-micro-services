@@ -38,4 +38,16 @@ public class CustomerService {
     public Boolean existsById(String customerId) {
         return StringUtils.isNotBlank(customerId) && customerRepository.existsById(customerId);
     }
+
+    public CustomerResponse findById(String customerId) {
+        return customerRepository.findById(customerId)
+                .map(customerMapper::toCustomerResponse)
+                .orElseThrow(() -> new CustomerNotFoundException(
+                    String.format("Customer with id %s not found", customerId)
+                ));
+    }
+
+    public void deleteCustomer(String customerId) {
+        customerRepository.deleteById(customerId);
+    }
 }
