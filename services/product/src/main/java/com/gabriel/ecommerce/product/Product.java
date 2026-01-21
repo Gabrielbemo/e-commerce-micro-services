@@ -2,7 +2,6 @@ package com.gabriel.ecommerce.product;
 
 import com.gabriel.ecommerce.category.Category;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -21,7 +20,6 @@ public class Product {
     @GeneratedValue
     @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     private UUID id;
-    @NotNull
     private String name;
     private String description;
     private double availableQuantity;

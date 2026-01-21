@@ -10,11 +10,24 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
+
     public UUID createProduct(@Valid ProductRequest request) {
-        return null;
+        var product = productMapper.toProduct(request);
+        return productRepository.save(product).getId();
     }
 
     public List<ProductPurchaseResponse> purchaseProducts(List<ProductPurchaseRequest> productPurchaseRequestList) {
+        return null;
+    }
+
+    public ProductResponse findById(UUID productId) {
+        return null;
+    }
+
+    public List<ProductResponse> findAll() {
         return null;
     }
 }
