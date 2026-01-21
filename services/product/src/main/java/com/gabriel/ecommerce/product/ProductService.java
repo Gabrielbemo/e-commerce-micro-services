@@ -1,5 +1,6 @@
 package com.gabriel.ecommerce.product;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,15 @@ public class ProductService {
     }
 
     public ProductResponse findById(UUID productId) {
-        return null;
+        return productRepository.findById(productId)
+                .map(productMapper::toProductResponse)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
     }
 
     public List<ProductResponse> findAll() {
-        return null;
+        return productRepository.findAll()
+                .stream()
+                .map(productMapper::toProductResponse)
+                .toList();
     }
 }
