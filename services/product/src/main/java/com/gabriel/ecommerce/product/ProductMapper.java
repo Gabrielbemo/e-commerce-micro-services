@@ -18,15 +18,25 @@ public class ProductMapper {
     }
 
     public ProductResponse toProductResponse(Product product) {
-        return ProductResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .availableQuantity(product.getAvailableQuantity())
-                .price(product.getPrice())
-                .categoryId(product.getCategory().getId())
-                .categoryName(product.getCategory().getName())
-                .categoryDescription(product.getCategory().getDescription())
-                .build();
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getAvailableQuantity(),
+                product.getPrice(),
+                product.getCategory().getId(),
+                product.getCategory().getName(),
+                product.getCategory().getDescription()
+        );
+    }
+
+    public ProductPurchaseResponse toProductPurchaseResponse(Product storedProduct) {
+        return new ProductPurchaseResponse(
+                storedProduct.getId(),
+                storedProduct.getName(),
+                storedProduct.getDescription(),
+                storedProduct.getPrice(),
+                storedProduct.getAvailableQuantity()
+        );
     }
 }
