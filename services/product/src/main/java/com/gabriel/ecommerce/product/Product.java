@@ -17,7 +17,6 @@ import java.util.UUID;
 public class Product {
 
     @Id
-    @GeneratedValue
     @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     private UUID id;
     private String name;
