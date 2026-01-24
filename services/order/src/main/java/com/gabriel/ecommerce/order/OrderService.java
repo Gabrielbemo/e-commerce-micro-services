@@ -1,6 +1,7 @@
 package com.gabriel.ecommerce.order;
 
 import com.gabriel.ecommerce.customer.CustomerClient;
+import com.gabriel.ecommerce.customer.CustomerResponse;
 import com.gabriel.ecommerce.exception.BusinessException;
 import com.gabriel.ecommerce.kafka.OrderConfirmation;
 import com.gabriel.ecommerce.kafka.OrderProducer;
@@ -8,6 +9,8 @@ import com.gabriel.ecommerce.orderline.OrderLineRequest;
 import com.gabriel.ecommerce.orderline.OrderLineService;
 import com.gabriel.ecommerce.product.ProductClient;
 import com.gabriel.ecommerce.product.ProductPurchaseRequest;
+import com.gabriel.ecommerce.product.ProductPurchaseResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,18 +50,22 @@ public class OrderService {
         );
     }
 
-    // start payment process
+    /*start the payment process*/
 
-    // send the order confirmation - notifications kafka
-    orderProducer.sendOrderConfirmation(new OrderConfirmation(
-            request.reference(),
-            request.amount(),
-            request.paymentMethod(),
-            customer,
-            purchasedProducts
-    ));
+    /*notifications kafka*/
+    sendOrderConfirmationNotification(request, customer, purchasedProducts);
 
     return order.getId();
+    }
+
+    private void sendOrderConfirmationNotification(OrderRequest request, CustomerResponse customer, List<ProductPurchaseResponse> purchasedProducts) {
+        orderProducer.sendOrderConfirmation(new OrderConfirmation(
+                request.reference(),
+                request.amount(),
+                request.paymentMethod(),
+                customer,
+                purchasedProducts
+        ));
     }
 
     public List<OrderResponse> findAll() {
@@ -66,5 +73,11 @@ public class OrderService {
                 .stream()
                 .map(orderMapper::toOrderResponse)
                 .toList();
+    }
+
+    public OrderResponse findById(UUID orderId) {
+        return orderRepository.findById(orderId)
+                .map(orderMapper::toOrderResponse)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
     }
 }

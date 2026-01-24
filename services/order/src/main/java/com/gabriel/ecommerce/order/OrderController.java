@@ -26,4 +26,11 @@ public class OrderController {
     public ResponseEntity<List<OrderResponse>> findAll(){
         return ResponseEntity.ok(orderService.findAll());
     }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponse> findById(
+            @PathVariable UUID orderId
+    ){
+        return ResponseEntity.ok(orderService.findById(orderId));
+    }
 }
