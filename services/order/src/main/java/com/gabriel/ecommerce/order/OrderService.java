@@ -7,6 +7,8 @@ import com.gabriel.ecommerce.kafka.OrderConfirmation;
 import com.gabriel.ecommerce.kafka.OrderProducer;
 import com.gabriel.ecommerce.orderline.OrderLineRequest;
 import com.gabriel.ecommerce.orderline.OrderLineService;
+import com.gabriel.ecommerce.payment.PaymentClient;
+import com.gabriel.ecommerce.payment.PaymentRequest;
 import com.gabriel.ecommerce.product.ProductClient;
 import com.gabriel.ecommerce.product.ProductPurchaseRequest;
 import com.gabriel.ecommerce.product.ProductPurchaseResponse;
@@ -28,34 +30,46 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderLineService orderLineService;
     private final OrderProducer orderProducer;
+    private final PaymentClient paymentClient;
 
     public UUID createOrder(@Valid OrderRequest request) {
-    //OpenFeign
-    var customer = this.customerClient.findCustomerById(request.customerId())
-            .orElseThrow(() -> new BusinessException("Customer not found"));
+        //OpenFeign
+        var customer = this.customerClient.findCustomerById(request.customerId())
+                .orElseThrow(() -> new BusinessException("Customer not found"));
 
-    //(RestTemplate)
-    var purchasedProducts = this.productClient.purchaseProducts(request.productPurchaseRequests());
+        //(RestTemplate)
+        var purchasedProducts = this.productClient.purchaseProducts(request.productPurchaseRequests());
 
-    var order = this.orderRepository.save(orderMapper.toOrder(request));
+        var order = this.orderRepository.save(orderMapper.toOrder(request));
 
-    for (ProductPurchaseRequest productPurchaseRequest : request.productPurchaseRequests()) {
-        orderLineService.saveOrderLine(
-                new OrderLineRequest(
-                        null,
-                        order.getId(),
-                        productPurchaseRequest.productId(),
-                        productPurchaseRequest.quantity()
-                )
-        );
+        for (ProductPurchaseRequest productPurchaseRequest : request.productPurchaseRequests()) {
+            orderLineService.saveOrderLine(
+                    new OrderLineRequest(
+                            null,
+                            order.getId(),
+                            productPurchaseRequest.productId(),
+                            productPurchaseRequest.quantity()
+                    )
+            );
+        }
+
+        /*start the payment process*/
+        processPayment(request, order, customer);
+
+        /*notifications kafka*/
+        sendOrderConfirmationNotification(request, customer, purchasedProducts);
+
+        return order.getId();
     }
 
-    /*start the payment process*/
-
-    /*notifications kafka*/
-    sendOrderConfirmationNotification(request, customer, purchasedProducts);
-
-    return order.getId();
+    private void processPayment(OrderRequest request, Order order, CustomerResponse customer) {
+        paymentClient.requestOderPayment(new PaymentRequest(
+                request.amount(),
+                request.paymentMethod(),
+                order.getId(),
+                order.getReference(),
+                customer
+                ));
     }
 
     private void sendOrderConfirmationNotification(OrderRequest request, CustomerResponse customer, List<ProductPurchaseResponse> purchasedProducts) {
