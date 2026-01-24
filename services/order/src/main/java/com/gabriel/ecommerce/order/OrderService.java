@@ -45,7 +45,7 @@ public class OrderService {
 
     // start payment process
 
-    // send the order confirmation -
+    // send the order confirmation - notifications {kafka}
     return null;
     }
 }
