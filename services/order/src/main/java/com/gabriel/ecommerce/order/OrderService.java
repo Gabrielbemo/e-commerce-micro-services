@@ -2,6 +2,8 @@ package com.gabriel.ecommerce.order;
 
 import com.gabriel.ecommerce.customer.CustomerClient;
 import com.gabriel.ecommerce.exception.BusinessException;
+import com.gabriel.ecommerce.kafka.OrderConfirmation;
+import com.gabriel.ecommerce.kafka.OrderProducer;
 import com.gabriel.ecommerce.orderline.OrderLineRequest;
 import com.gabriel.ecommerce.orderline.OrderLineService;
 import com.gabriel.ecommerce.product.ProductClient;
@@ -21,6 +23,7 @@ public class OrderService {
     private final ProductClient productClient;
     private final OrderMapper orderMapper;
     private final OrderLineService orderLineService;
+    private final OrderProducer orderProducer;
 
     public UUID createOrder(@Valid OrderRequest request) {
     //OpenFeign
@@ -28,7 +31,7 @@ public class OrderService {
             .orElseThrow(() -> new BusinessException("Customer not found"));
 
     //(RestTemplate)
-    this.productClient.purchaseProducts(request.productPurchaseRequests());
+    var purchasedProducts = this.productClient.purchaseProducts(request.productPurchaseRequests());
 
     var order = this.orderRepository.save(orderMapper.toOrder(request));
 
@@ -45,7 +48,15 @@ public class OrderService {
 
     // start payment process
 
-    // send the order confirmation - notifications {kafka}
-    return null;
+    // send the order confirmation - notifications kafka
+    orderProducer.sendOrderConfirmation(new OrderConfirmation(
+            request.reference(),
+            request.amount(),
+            request.paymentMethod(),
+            customer,
+            purchasedProducts
+    ));
+
+    return order.getId();
     }
 }
