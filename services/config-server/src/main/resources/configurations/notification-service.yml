@@ -1,0 +1,37 @@
+spring:
+  data:
+    mongodb:
+      username: gabriel
+      password: gabriel
+      host: localhost
+      port: 27017
+      database: notification
+      authentication-database: admin
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: paymentGroup,orderGroup
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringSerializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: paymentNotificationRequest:com.gabriel.ecommerce.kafka.payment.PaymentConfirmation,orderConfirmation:com.gabriel.ecommerce.kafka.order.OrderConfirmation
+  mail:
+    host: localhost
+    port: 1025
+    username: gabriel
+    password: gabriel
+    properties:
+      mail:
+        smtp:
+          trust: "*"
+        auth: true
+        starttls:
+          enable: true
+        connectiontimeout: 5000
+        timeout: 3000
+        writetimeout: 5000
+
+server:
+  port: 8040
