@@ -1,0 +1,26 @@
+package com.gabriel.ecommerce.notification;
+
+import com.gabriel.ecommerce.kafka.order.OrderConfirmation;
+import com.gabriel.ecommerce.kafka.payment.PaymentConfirmation;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Getter
+@Setter
+@Document
+public class Notification {
+
+    @Id
+    private UUID id;
+    private NotificationType type;
+    private Instant notificationDate;
+    private OrderConfirmation orderConfirmation;
+    private PaymentConfirmation paymentConfirmation;
+}
