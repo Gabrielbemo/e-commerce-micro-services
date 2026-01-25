@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Pedido</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #2c3e50;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .content {
+            padding: 40px;
+            line-height: 1.6;
+        }
+        .content h2 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+        .order-info {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .products-table th {
+            text-align: left;
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .products-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .total-section {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #f4f7f6;
+            color: #7f8c8d;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>E-Commerce</h1>
+        </div>
+        <div class="content">
+            <h2>Pedido Recebido!</h2>
+            <p>Olá, <strong th:text="${customerName}">Cliente</strong>,</p>
+            <p>Agradecemos a sua preferência. O seu pedido foi registrado com sucesso e a confirmação de pagamento será processada em breve.</p>
+            
+            <div class="order-info">
+                <p><strong>Referência do Pedido:</strong> <span th:text="${orderReference}">#12345</span></p>
+            </div>
+
+            <h3>Resumo do Pedido</h3>
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Qtd.</th>
+                        <th>Preço</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="product : ${products}">
+                        <td th:text="${product.name}">Nome do Produto</td>
+                        <td th:text="${product.quantity}">1</td>
+                        <td>R$ <span th:text="${#numbers.formatDecimal(product.price, 1, 'POINT', 2, 'COMMA')}">0,00</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="total-section">
+                Total: R$ <span th:text="${#numbers.formatDecimal(totalAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+            </div>
+            
+            <p>Em breve você receberá um e-mail com a confirmação do pagamento e os detalhes do envio.</p>
+        </div>
+        <div class="footer">
+            <p>Este é um e-mail automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>
