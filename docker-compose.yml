@@ -39,8 +39,6 @@ services:
       - mongo:/data/db
     ports:
       - 27017:27017
-    networks:
-      - microservices-net
     restart: unless-stopped
 
   mongo-express:
