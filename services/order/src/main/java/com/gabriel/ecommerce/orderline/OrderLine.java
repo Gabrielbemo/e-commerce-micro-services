@@ -23,6 +23,6 @@ public class OrderLine {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
-    private UUID productId;
+    private String productId;
     private double quantity;
 }

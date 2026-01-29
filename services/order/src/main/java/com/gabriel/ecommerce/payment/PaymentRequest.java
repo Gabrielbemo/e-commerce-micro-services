@@ -9,7 +9,7 @@ import java.util.UUID;
 public record PaymentRequest(
         BigDecimal amount,
         PaymentMethod paymentMethod,
-        UUID userId,
+        UUID orderId,
         String orderReference,
         CustomerResponse customer
 ) {

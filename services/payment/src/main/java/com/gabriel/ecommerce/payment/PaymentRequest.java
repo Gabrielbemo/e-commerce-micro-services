@@ -8,7 +8,7 @@ public record PaymentRequest(
         UUID id,
         BigDecimal amount,
         PaymentMethod paymentMethod,
-        UUID userId,
+        UUID orderId,
         String orderReference,
         Customer customer
 ) {

@@ -13,6 +13,6 @@ import java.util.UUID;
 )
 public interface CustomerClient {
 
-    @GetMapping("/customers/{id}")
-    Optional<CustomerResponse> findCustomerById(@PathVariable UUID id);
+    @GetMapping("/{id}")
+    Optional<CustomerResponse> findCustomerById(@PathVariable String id);
 }

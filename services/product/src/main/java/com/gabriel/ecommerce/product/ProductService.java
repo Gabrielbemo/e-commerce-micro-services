@@ -28,7 +28,7 @@ public class ProductService {
                 .toList();
 
         var storedProducts = productRepository.findAllById(productIds);
-        if(productIds.size() == storedProducts.size()){
+        if(productIds.size() != storedProducts.size()){
             throw new ProductPurchaseException("One or more products not found");
         }
 

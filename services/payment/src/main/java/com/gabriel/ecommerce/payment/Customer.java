@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Validated
 public record Customer(
-        UUID id,
+        String id,
         @NotNull(message = "First name cannot be null")
         String firstName,
         @NotNull(message = "Last name cannot be null")

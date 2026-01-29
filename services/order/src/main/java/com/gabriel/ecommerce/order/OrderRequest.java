@@ -18,7 +18,7 @@ public record OrderRequest(
     PaymentMethod paymentMethod,
 
     @NotNull(message = "Customer ID cannot be null")
-    UUID customerId,
+    String customerId,
     @NotEmpty(message = "Products cannot be empty")
     List<ProductPurchaseRequest> productPurchaseRequests
 ) {
