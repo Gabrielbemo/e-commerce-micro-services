@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Notification {
 
     @Id
-    private UUID id;
+    private String id;
     private NotificationType type;
     private Instant notificationDate;
     private OrderConfirmation orderConfirmation;

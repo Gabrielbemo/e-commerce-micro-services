@@ -39,7 +39,7 @@ public class EmailService {
                 MimeMessageHelper.MULTIPART_MODE_RELATED,
                 StandardCharsets.UTF_8.name());
 
-        messageHelper.setFrom("");
+        messageHelper.setFrom("email@email.com");
 
         final String templateName = EmailTemplates.PAYMENT_CONFIRMATION.getTemplate();
 
@@ -80,7 +80,7 @@ public class EmailService {
                 MimeMessageHelper.MULTIPART_MODE_RELATED,
                 StandardCharsets.UTF_8.name());
 
-        messageHelper.setFrom("");
+        messageHelper.setFrom("email@email.com");
 
         final String templateName = EmailTemplates.ORDER_CONFIRMATION.getTemplate();
 
