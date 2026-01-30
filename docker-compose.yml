@@ -29,6 +29,14 @@ services:
       - microservices-net
     restart: unless-stopped
 
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - microservices-net
+
   mongodb:
     container_name: ms_mongo_db
     image: mongo

@@ -10,12 +10,3 @@ spring:
           search-locations: classpath:/configurations
 server:
   port: 8888
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
