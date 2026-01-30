@@ -37,6 +37,23 @@ services:
     networks:
       - microservices-net
 
+  keycloak:
+    container_name: keyclock-ms
+    image: quay.io/keycloak/keycloak:24.0.2
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: "start-dev"
+    ports:
+      - "9098:8080"
+    networks:
+      - microservices-net
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "512M"
+
   mongodb:
     container_name: ms_mongo_db
     image: mongo
