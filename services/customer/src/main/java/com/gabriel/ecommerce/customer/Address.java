@@ -1,7 +1,12 @@
 package com.gabriel.ecommerce.customer;
 
 
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 @AllArgsConstructor

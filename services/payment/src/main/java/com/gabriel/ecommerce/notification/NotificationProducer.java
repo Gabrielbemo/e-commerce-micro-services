@@ -15,7 +15,7 @@ public class NotificationProducer {
 
     private final KafkaTemplate<String, PaymentNotificationRequest> kafkaTemplate;
 
-    public void sendNotification(PaymentNotificationRequest paymentNotificationRequest){
+    public void sendNotification(PaymentNotificationRequest paymentNotificationRequest) {
         log.info("Sending notification to kafka topic: {}", paymentNotificationRequest);
         Message<PaymentNotificationRequest> message = MessageBuilder
                 .withPayload(paymentNotificationRequest)

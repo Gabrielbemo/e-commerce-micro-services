@@ -23,7 +23,7 @@ public class CustomerService {
     public void updateCustomer(@Valid CustomerRequest customerRequest) {
         var customer = customerRepository.findById(customerRequest.id())
                 .orElseThrow(() -> new CustomerNotFoundException(
-                    String.format("Customer with id %s not found", customerRequest.id())
+                        String.format("Customer with id %s not found", customerRequest.id())
                 ));
         customerMapper.mergeCustomer(customer, customerRequest);
         customerRepository.save(customer);
@@ -43,7 +43,7 @@ public class CustomerService {
         return customerRepository.findById(customerId)
                 .map(customerMapper::toCustomerResponse)
                 .orElseThrow(() -> new CustomerNotFoundException(
-                    String.format("Customer with id %s not found", customerId)
+                        String.format("Customer with id %s not found", customerId)
                 ));
     }
 

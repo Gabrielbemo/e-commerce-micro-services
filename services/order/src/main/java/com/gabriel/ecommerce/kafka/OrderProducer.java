@@ -15,7 +15,7 @@ public class OrderProducer {
 
     private final KafkaTemplate<String, OrderConfirmation> kafkaTemplate;
 
-    public void sendOrderConfirmation(OrderConfirmation orderConfirmation){
+    public void sendOrderConfirmation(OrderConfirmation orderConfirmation) {
         log.info("Sending order confirmation to kafka topic: {}", orderConfirmation);
         Message<OrderConfirmation> message = MessageBuilder
                 .withPayload(orderConfirmation)

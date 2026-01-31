@@ -18,19 +18,19 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<UUID> createOrder(
             @RequestBody @Valid OrderRequest request
-    ){
+    ) {
         return ResponseEntity.ok(orderService.createOrder(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> findAll(){
+    public ResponseEntity<List<OrderResponse>> findAll() {
         return ResponseEntity.ok(orderService.findAll());
     }
 
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> findById(
             @PathVariable UUID orderId
-    ){
+    ) {
         return ResponseEntity.ok(orderService.findById(orderId));
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaOrderTopicConfig {
 
-    public NewTopic orderTopic(){
+    public NewTopic orderTopic() {
         return TopicBuilder
                 .name("order-topic")
                 .build();

@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductClient {
 
-    @Value( "${application.config.product-url}")
+    @Value("${application.config.product-url}")
     private String productUrl;
     private final RestTemplate restTemplate;
 
@@ -25,16 +25,17 @@ public class ProductClient {
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<List<ProductPurchaseRequest>> requestEntity = new HttpEntity<>(request, headers);
         ParameterizedTypeReference<List<ProductPurchaseResponse>> responseType =
-                new ParameterizedTypeReference<>() {};
+                new ParameterizedTypeReference<>() {
+                };
 
         ResponseEntity<List<ProductPurchaseResponse>> responseEntity = restTemplate.exchange(
                 productUrl + "/purchase",
                 HttpMethod.POST,
                 requestEntity,
                 responseType
-                );
+        );
 
-        if(responseEntity.getStatusCode().isError()){
+        if (responseEntity.getStatusCode().isError()) {
             throw new BusinessException("Failed to purchase products: " + responseEntity.getStatusCode());
         }
         return responseEntity.getBody();

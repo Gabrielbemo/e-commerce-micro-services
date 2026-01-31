@@ -53,10 +53,8 @@ public class OrderService {
             );
         }
 
-        /*start the payment process*/
         processPayment(request, order, customer);
 
-        /*notifications kafka*/
         sendOrderConfirmationNotification(request, customer, purchasedProducts);
 
         return order.getId();
@@ -69,7 +67,7 @@ public class OrderService {
                 order.getId(),
                 order.getReference(),
                 customer
-                ));
+        ));
     }
 
     private void sendOrderConfirmationNotification(OrderRequest request, CustomerResponse customer, List<ProductPurchaseResponse> purchasedProducts) {

@@ -17,16 +17,16 @@ public class CustomerMapper {
     }
 
     public void mergeCustomer(Customer customer, @Valid CustomerRequest customerRequest) {
-        if (StringUtils.isNotBlank(customerRequest.firstName())){
+        if (StringUtils.isNotBlank(customerRequest.firstName())) {
             customer.setFirstName(customerRequest.firstName());
         }
-        if (StringUtils.isNotBlank(customerRequest.lastName())){
+        if (StringUtils.isNotBlank(customerRequest.lastName())) {
             customer.setLastName(customerRequest.lastName());
         }
-        if (StringUtils.isNotBlank(customerRequest.email())){
+        if (StringUtils.isNotBlank(customerRequest.email())) {
             customer.setEmail(customerRequest.email());
         }
-        if (customerRequest.address() != null){
+        if (customerRequest.address() != null) {
             customer.setAddress(customerRequest.address());
         }
     }
