@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/order
+    url: jdbc:postgresql://ms_pg_sql:5432/order
     username: gabriel
     password: gabriel
     driver-class-name: org.postgresql.Driver
@@ -22,6 +22,6 @@ server:
 
 application:
   config:
-    customer-url: http://localhost:8222/api/v1/customers
-    payment-url: http://localhost:8222/api/v1/payments
-    product-url: http://localhost:8222/api/v1/products
+    customer-url: http://customer-service:8222/api/v1/customers
+    payment-url: http://payment-service:8222/api/v1/payments
+    product-url: http://product-service:8222/api/v1/products
