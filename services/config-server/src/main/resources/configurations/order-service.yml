@@ -16,6 +16,16 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: orderConfirmation:com.gabriel.ecommerce.kafka.OrderConfirmation
+eureka:
+  instance:
+    hostname: order-service
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
 
 server:
   port: 8070
