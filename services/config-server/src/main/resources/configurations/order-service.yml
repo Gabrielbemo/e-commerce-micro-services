@@ -32,6 +32,6 @@ server:
 
 application:
   config:
-    customer-url: http://customer-service:8222/api/v1/customers
-    payment-url: http://payment-service:8222/api/v1/payments
-    product-url: http://product-service:8222/api/v1/products
+    customer-url: http://customer-service:8090/api/v1/customers
+    payment-url: http://payment-service:8060/api/v1/payments
+    product-url: http://product-service:8050/api/v1/products

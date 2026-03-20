@@ -3,7 +3,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "http://keyclock-ms:8080/realms/micro-services"
+          issuer-uri: "http://keycloak-ms:8080/realms/micro-services"
   cloud:
     gateway:
       discovery:
@@ -30,12 +30,14 @@ spring:
           uri: lb://PAYMENT-SERVICE
           predicates:
             - Path=/api/v1/payments/**
+
 management:
   tracing:
+    enabled: true
     sampling:
       probability: 1.0
-  zipkin:
-    tracing:
-      endpoint: http://zipkin:9411/api/v2/spans
+    export:
+      zipkin:
+        endpoint: http://zipkin:9411/api/v2/spans
 server:
   port: 8222

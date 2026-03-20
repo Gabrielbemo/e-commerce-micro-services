@@ -38,19 +38,21 @@ services:
       - microservices-net
 
   keycloak:
-    container_name: keyclock-ms
+    container_name: keycloak-ms
     image: quay.io/keycloak/keycloak:24.0.2
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME_URL: http://localhost:9098
-      KC_HOSTNAME_ADMIN_URL: http://localhost:9098
+      KC_HOSTNAME_URL: http://keycloak-ms:8080
+      KC_HOSTNAME_ADMIN_URL: http://keycloak-ms:8080
       KC_HOSTNAME_STRICT: false
     command: "start-dev"
     ports:
       - "9098:8080"
     networks:
-      - microservices-net
+      microservices-net:
+        aliases:
+          - keyclock-ms
     deploy:
       resources:
         limits:
@@ -127,6 +129,118 @@ services:
     ports:
       - 1025:1025
       - 1080:1080
+    networks:
+      - microservices-net
+
+  config-server:
+    container_name: config-server
+    build:
+      context: ./services/config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      - postgres
+      - pgadmin
+      - zipkin
+      - keycloak
+      - mongodb
+      - mongo-express
+      - zookeeper
+      - kafka
+      - mail-dev
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  discovery-service:
+    container_name: discovery-service
+    build:
+      context: ./services/discovery
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-server
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  product-service:
+    container_name: product-service
+    build:
+      context: ./services/product
+    ports:
+      - "8050:8050"
+    depends_on:
+      - discovery-service
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  customer-service:
+    container_name: customer-service
+    build:
+      context: ./services/customer
+    ports:
+      - "8090:8090"
+    depends_on:
+      - product-service
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  payment-service:
+    container_name: payment-service
+    build:
+      context: ./services/payment
+    ports:
+      - "8060:8060"
+    depends_on:
+      - product-service
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  order-service:
+    container_name: order-service
+    build:
+      context: ./services/order
+    ports:
+      - "8070:8070"
+    depends_on:
+      - product-service
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  notification-service:
+    container_name: notification-service
+    build:
+      context: ./services/notification
+    ports:
+      - "8040:8040"
+    depends_on:
+      - product-service
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  gateway-server:
+    container_name: gateway-server
+    build:
+      context: ./services/gateway-server
+    ports:
+      - "8222:8222"
+    depends_on:
+      - config-server
+      - discovery-service
+      - product-service
+      - customer-service
+      - payment-service
+      - order-service
+      - notification-service
+    networks:
+      - microservices-net
+    restart: unless-stopped
 
 networks:
   microservices-net:
