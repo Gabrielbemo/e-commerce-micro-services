@@ -10,12 +10,21 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   kafka:
+    bootstrap-servers: ms_kafka:9092
     producer:
-      bootstrap-servers: ms_kafka:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: paymentNotificationRequest:com.gabriel.ecommerce.notification.PaymentNotificationRequest
-
+eureka:
+  instance:
+    hostname: payment-service
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
 server:
   port: 8060

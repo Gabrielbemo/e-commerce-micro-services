@@ -1,9 +1,10 @@
 eureka:
   instance:
-    hostname: discovery-service
+    #hostname: localhost
+    prefer-ip-address: true
   client:
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:8761/eureka/
+      defaultZone: http://discovery-service:8761/eureka/
 spring:
   cloud:
     config:
@@ -11,5 +12,7 @@ spring:
 
 management:
   tracing:
+    propagation:
+      type: w3c
     sampling:
       probability: 1.0

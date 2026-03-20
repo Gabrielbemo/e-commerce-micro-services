@@ -1,4 +1,8 @@
 spring:
+  application:
+    name: product-service
+  zipkin:
+    base-url: http://zipkin:9411/
   datasource:
     url: jdbc:postgresql://ms_pg_sql:5432/product
     username: gabriel
@@ -16,5 +20,18 @@ spring:
     baseline-version: 0
     username: ${spring.datasource.username}
     password: ${spring.datasource.password}
+eureka:
+  instance:
+    hostname: product-service
+
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    export:
+      zipkin:
+        endpoint: http://zipkin:9411/api/v2/spans
+
 server:
   port: 8050
