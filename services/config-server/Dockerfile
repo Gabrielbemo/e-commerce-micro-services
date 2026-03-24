@@ -1,5 +1,5 @@
 #build
-FROM maven:3.9.12-eclipse-temurin-25-alpine AS build
+FROM maven:3.9.12-eclipse-temurin-21-alpine AS build
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn -B clean package -DskipTests
 
 #runtime
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ USER spring
 
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-jar", "app.jar"]
 
-#FROM eclipse-temurin:25
+#FROM eclipse-temurin:21
 #RUN mkdir /opt/app
 #COPY target/*.jar /opt/app/app.jar
 #CMD ["java", "-jar", "/opt/app/app.jar"]

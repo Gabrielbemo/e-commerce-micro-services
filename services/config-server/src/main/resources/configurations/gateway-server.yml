@@ -30,14 +30,20 @@ spring:
           uri: lb://PAYMENT-SERVICE
           predicates:
             - Path=/api/v1/payments/**
-
 management:
   tracing:
     enabled: true
     sampling:
       probability: 1.0
-    export:
-      zipkin:
-        endpoint: http://zipkin:9411/api/v2/spans
+    propagation:
+      type: B3,W3C
+    baggage:
+      - traceId
+      - spanId
+    baggage-correlation:
+      enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
 server:
   port: 8222
