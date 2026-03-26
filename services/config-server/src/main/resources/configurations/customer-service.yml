@@ -6,6 +6,9 @@ spring:
     port: 27017
     database: customer
     authentication-database: admin
+springdoc:
+  swagger-ui:
+    enabled: false
 eureka:
   instance:
     hostname: customer-service

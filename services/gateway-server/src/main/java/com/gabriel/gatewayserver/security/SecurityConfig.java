@@ -16,7 +16,14 @@ public class SecurityConfig {
         serverHttpSecurity
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/eureka/**")
+                        .pathMatchers(
+                                "/eureka/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/aggregate/**",
+                                "/webjars/**"
+                        )
                         .permitAll()
                         .anyExchange()
                         .authenticated())

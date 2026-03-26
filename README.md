@@ -1,8 +1,8 @@
 # e-commerce-micro-services
 
-Guia rapido para subir, autenticar via Keycloak e testar as APIs pelo gateway.
+Guia rápido para subir, autenticar via Keycloak e testar as APIs pelo gateway.
 
-## 1) Pre requisitos
+## 1) Pré-requisitos
 
 - Docker + Docker Compose
 - `curl`
@@ -32,8 +32,8 @@ docker compose up -d --build
 
 Este bootstrap cria/ajusta:
 - realm: `micro-services`
-- client publico: `gateway-client` (com password grant habilitado)
-- usuario de teste: `demo-user` / `demo123`
+- cliente público: `gateway-client` (com password grant habilitado)
+- usuário de teste: `demo-user` / `demo123`
 - `frontendUrl` do realm para alinhar o issuer esperado pelo gateway
 
 ```bash
@@ -167,7 +167,27 @@ curl -i "http://localhost:8222/api/v1/products" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-## 5) Rotas para teste (somente via gateway)
+## 5) Swagger centralizado (via gateway)
+
+UI única da API (pública, sem token):
+
+```bash
+http://localhost:8222/swagger-ui.html
+```
+
+No Swagger UI, use o seletor no canto superior para alternar entre os docs de:
+- Product Service
+- Customer Service
+- Order Service
+- Payment Service
+
+Os endpoints de negócio continuam protegidos. Para testar pelo Swagger, clique em **Authorize** e informe:
+
+```text
+Bearer <SEU_TOKEN>
+```
+
+## 6) Rotas para teste (somente via gateway)
 
 Base URL: `http://localhost:8222`
 
@@ -179,7 +199,7 @@ Todas as rotas abaixo exigem:
 
 ### Products
 
-| Metodo | Rota | Descricao |
+| Método | Rota | Descrição |
 |---|---|---|
 | GET | `/api/v1/products` | Lista todos os produtos |
 | GET | `/api/v1/products/{productId}` | Busca um produto por id |
@@ -188,7 +208,7 @@ Todas as rotas abaixo exigem:
 
 ### Customers
 
-| Metodo | Rota | Descricao |
+| Método | Rota | Descrição |
 |---|---|---|
 | GET | `/api/v1/customers` | Lista clientes |
 | GET | `/api/v1/customers/{customerId}` | Busca cliente por id |
@@ -199,7 +219,7 @@ Todas as rotas abaixo exigem:
 
 ### Orders
 
-| Metodo | Rota | Descricao |
+| Método | Rota | Descrição |
 |---|---|---|
 | GET | `/api/v1/orders` | Lista pedidos |
 | GET | `/api/v1/orders/{orderId}` | Busca pedido por id |
@@ -207,17 +227,17 @@ Todas as rotas abaixo exigem:
 
 ### Order Lines
 
-| Metodo | Rota | Descricao |
+| Método | Rota | Descrição |
 |---|---|---|
 | GET | `/api/v1/order-lines/order/{orderId}` | Lista os itens de um pedido |
 
 ### Payments
 
-| Metodo | Rota | Descricao |
+| Método | Rota | Descrição |
 |---|---|---|
 | POST | `/api/v1/payments` | Cria um pagamento |
 
-## 6) Exemplos rapidos de teste
+## 7) Exemplos rápidos de teste
 
 Listar produtos:
 
@@ -239,7 +259,7 @@ curl -sS -X POST "http://localhost:8222/api/v1/customers" \
   }'
 ```
 
-Criar pedido (use ids validos de cliente e produto):
+Criar pedido (use ids válidos de cliente e produto):
 
 ```bash
 curl -sS -X POST "http://localhost:8222/api/v1/orders" \
@@ -256,7 +276,7 @@ curl -sS -X POST "http://localhost:8222/api/v1/orders" \
   }'
 ```
 
-## 7) Visao grafica simples das tabelas/colecoes
+## 8) Visão gráfica simples das tabelas/coleções
 
 ```text
 PostgreSQL (database: product)
@@ -293,7 +313,7 @@ customer_order
 order_line
   - id (PK)
   - order_id (FK -> customer_order.id)
-  - product_id (referencia logica ao product-service)
+  - product_id (referência lógica ao product-service)
   - quantity
 
 
@@ -303,7 +323,7 @@ payment
   - id (PK)
   - amount
   - payment_method
-  - order_id (referencia logica ao customer_order.id)
+  - order_id (referência lógica ao customer_order.id)
   - created_at
   - updated_at
 
@@ -321,11 +341,11 @@ collection: customer
       - zipCode
 ```
 
-## 8) Troubleshooting rapido
+## 9) Troubleshooting rápido
 
 - `401 Unauthorized`: token ausente ou expirado, gere outro token.
-- `issuer mismatch` no gateway: rode novamente o bootstrap do Keycloak (secao 3).
-- `ms_kafka Exited (1)`: limpe volumes de Kafka/Zookeeper (secao 2).
+- `issuer mismatch` no gateway: rode novamente o bootstrap do Keycloak (seção 3).
+- `ms_kafka Exited (1)`: limpe volumes de Kafka/Zookeeper (seção 2).
 - `product-service` com `missing table [category]`: recrie o DB `product`.
 
 Comando para recriar apenas o DB `product`:
