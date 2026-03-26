@@ -16,6 +16,9 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: paymentNotificationRequest:com.gabriel.ecommerce.notification.PaymentNotificationRequest
+springdoc:
+  swagger-ui:
+    enabled: false
 eureka:
   instance:
     hostname: payment-service

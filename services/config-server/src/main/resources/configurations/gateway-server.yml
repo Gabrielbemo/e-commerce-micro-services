@@ -30,6 +30,44 @@ spring:
           uri: lb://PAYMENT-SERVICE
           predicates:
             - Path=/api/v1/payments/**
+        - id: product-service-openapi
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/aggregate/product-service/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+        - id: customer-service-openapi
+          uri: lb://CUSTOMER-SERVICE
+          predicates:
+            - Path=/aggregate/customer-service/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+        - id: order-service-openapi
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/aggregate/order-service/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+        - id: payment-service-openapi
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/aggregate/payment-service/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    urls:
+      - name: Product Service
+        url: /aggregate/product-service/v3/api-docs
+      - name: Customer Service
+        url: /aggregate/customer-service/v3/api-docs
+      - name: Order Service
+        url: /aggregate/order-service/v3/api-docs
+      - name: Payment Service
+        url: /aggregate/payment-service/v3/api-docs
+    urls-primary-name: Order Service
 management:
   tracing:
     enabled: true
