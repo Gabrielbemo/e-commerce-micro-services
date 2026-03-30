@@ -1,13 +1,15 @@
 package com.gabriel.ecommerce;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootTest
+import static org.assertj.core.api.Assertions.assertThat;
+
 class ProductApplicationTests {
 
     @Test
-    void contextLoads() {
+    void shouldBeSpringBootApplicationAnnotated() {
+        assertThat(ProductApplication.class.isAnnotationPresent(SpringBootApplication.class)).isTrue();
     }
 
 }

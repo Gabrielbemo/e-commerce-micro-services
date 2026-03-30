@@ -1,13 +1,15 @@
 package com.gabriel.gatewayserver;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootTest
+import static org.assertj.core.api.Assertions.assertThat;
+
 class GatewayServerApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void shouldBeSpringBootApplicationAnnotated() {
+        assertThat(GatewayServerApplication.class.isAnnotationPresent(SpringBootApplication.class)).isTrue();
+    }
 
 }
