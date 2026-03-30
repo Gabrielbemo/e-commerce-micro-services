@@ -354,3 +354,48 @@ Comando para recriar apenas o DB `product`:
 docker exec ms_pg_sql psql -U gabriel -d postgres -c "DROP DATABASE IF EXISTS product WITH (FORCE);"
 docker exec ms_pg_sql psql -U gabriel -d postgres -c "CREATE DATABASE product;"
 ```
+
+## 10) Testes unitários e cobertura (JaCoCo)
+
+Os serviços estão configurados com:
+- testes unitários com JUnit 5 + Mockito
+- relatório de cobertura com JaCoCo
+- gate de cobertura mínima no `mvn verify`
+
+### Rodar todos os serviços com validação de cobertura
+
+Na raiz do projeto:
+
+```bash
+for service in config-server discovery gateway-server customer product order payment notification; do
+  (cd services/$service && sh mvnw clean verify)
+done
+```
+
+### Rodar um serviço específico
+
+Exemplo (order-service):
+
+```bash
+cd services/order
+sh mvnw clean verify
+```
+
+### Onde ver os relatórios
+
+Após o `verify`, abra no navegador:
+
+```text
+services/<nome-do-servico>/target/site/jacoco/index.html
+```
+
+Exemplo:
+
+```text
+services/order/target/site/jacoco/index.html
+```
+
+### Observações
+
+- O `jacoco:check` quebra o build quando a cobertura mínima configurada para o serviço não é atendida.
+- Nos serviços de infraestrutura (`config-server` e `discovery`), a classe de bootstrap (`*Application`) é excluída da análise de cobertura por não conter regra de negócio.
