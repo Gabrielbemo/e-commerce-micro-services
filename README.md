@@ -399,3 +399,173 @@ services/order/target/site/jacoco/index.html
 
 - O `jacoco:check` quebra o build quando a cobertura mínima configurada para o serviço não é atendida.
 - Nos serviços de infraestrutura (`config-server` e `discovery`), a classe de bootstrap (`*Application`) é excluída da análise de cobertura por não conter regra de negócio.
+
+## 11) Observabilidade completa mantendo o Zipkin
+
+O projeto agora sobe uma stack de observabilidade completa com:
+
+- `Zipkin` para traces distribuídos
+- `Prometheus` para métricas
+- `Loki` para logs centralizados
+- `Promtail` para coleta de logs dos containers
+- `Grafana` para dashboards, logs e consulta unificada
+
+### URLs
+
+- Grafana: `http://localhost:3000` (`admin` / `admin`)
+- Prometheus: `http://localhost:9090`
+- Zipkin: `http://localhost:9411`
+- Loki: `http://localhost:3100/ready`
+
+### O que já está configurado
+
+- todos os serviços exportam métricas em `/actuator/prometheus`
+- logs dos containers são coletados no Loki e o gateway possui log explícito de requisição para validação operacional
+- Grafana já sobe com data sources provisionados para `Prometheus`, `Loki` e `Zipkin`
+- dashboard inicial `Microservices Overview` já fica disponível em `Dashboards > Observability`
+
+### Passo a passo para validar a observabilidade
+
+#### 1. Suba todo o ambiente
+
+```bash
+docker compose up -d --build
+```
+
+Confira se a stack subiu:
+
+```bash
+docker compose ps
+```
+
+Valide os componentes de observabilidade:
+
+```bash
+curl -sS http://localhost:9090/-/ready
+curl -sS http://localhost:3100/ready
+curl -sS http://localhost:9411/health
+```
+
+#### 2. Gere tráfego na aplicação
+
+Para validar rapidamente a stack sem depender de autenticação nem de descoberta de serviços, gere tráfego no gateway:
+
+```bash
+curl -sS "http://localhost:8222/actuator/prometheus" > /dev/null
+curl -sS "http://localhost:8222/actuator/prometheus" > /dev/null
+```
+
+Se quiser validar também o fluxo funcional da API, gere o token conforme a seção 4 e execute chamadas de negócio pelo gateway:
+
+```bash
+curl -i "http://localhost:8222/api/v1/products" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -i "http://localhost:8222/api/v1/customers" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Para gerar mais volume para métricas:
+
+```bash
+for i in 1 2 3 4 5; do
+  curl -sS "http://localhost:8222/actuator/prometheus" > /dev/null
+done
+```
+
+#### 3. Validar traces no Zipkin
+
+Abra `http://localhost:9411`.
+
+No campo de busca:
+
+- selecione o serviço `gateway-server`
+- clique em `Run Query`
+
+Resultado esperado:
+
+- traces HTTP do gateway preservados no Zipkin
+- spans de segurança e requisição encadeados para cada chamada validada
+
+#### 4. Validar métricas no Prometheus
+
+Abra `http://localhost:9090/targets`.
+
+Resultado esperado:
+
+- todos os jobs dos serviços com status `UP`
+
+Observação: depois de um `docker compose up -d --build`, aguarde cerca de `30-60s` para a malha estabilizar e todos os targets ficarem `UP`.
+
+Depois, em `Graph`, teste consultas como:
+
+```promql
+up
+```
+
+```promql
+sum by (application) (rate(http_server_requests_seconds_count[5m]))
+```
+
+```promql
+histogram_quantile(0.95, sum by (le, application) (rate(http_server_requests_seconds_bucket[5m])))
+```
+
+#### 5. Validar dashboards no Grafana
+
+Abra `http://localhost:3000` e faça login com `admin` / `admin`.
+
+Confira:
+
+- `Connections > Data sources`: os data sources `Prometheus`, `Loki` e `Zipkin` devem estar `healthy`
+- `Dashboards > Observability > Microservices Overview`: o dashboard inicial deve carregar dados
+
+O dashboard exibe:
+
+- disponibilidade dos serviços
+- throughput HTTP
+- taxa de erro `5xx`
+- latência `p95`
+- uso de heap por serviço
+
+#### 6. Validar logs no Grafana com Loki
+
+No Grafana, abra `Explore` e selecione o data source `Loki`.
+
+Consultas úteis:
+
+```logql
+{service="gateway-server"} |= "Gateway request"
+```
+
+```logql
+{service="order-service"}
+```
+
+```logql
+{service="notification-service"}
+```
+
+Resultado esperado:
+
+- logs centralizados de todos os containers
+- logs de requisição explícitos do gateway disponíveis no Loki
+- logs de negócio e infraestrutura pesquisáveis por `service`, `container` e período
+
+### Endpoints úteis por serviço
+
+- Gateway: `http://localhost:8222/actuator/prometheus`
+- Product: `http://localhost:8050/actuator/prometheus`
+- Customer: `http://localhost:8090/actuator/prometheus`
+- Order: `http://localhost:8070/actuator/prometheus`
+- Payment: `http://localhost:8060/actuator/prometheus`
+- Notification: `http://localhost:8040/actuator/prometheus`
+- Discovery: `http://localhost:8761/actuator/prometheus`
+- Config Server: `http://localhost:8888/actuator/prometheus`
+
+### Observações operacionais
+
+- o sampling continua no `Zipkin`; por padrão está em `1.0` para facilitar validação local
+- para produção, ajuste `MANAGEMENT_TRACING_SAMPLING_PROBABILITY` para reduzir custo de tracing
+- as credenciais padrão do Grafana são adequadas apenas para ambiente local de desenvolvimento
+- a validação ponta a ponta confirmada neste repositório cobre `métricas` em todos os serviços, `logs centralizados` no Loki e `traces` confirmados no `gateway-server`; os serviços Spring Boot `4.0.x` ainda exigem alinhamento adicional para exportar spans downstream ao Zipkin com a mesma confiabilidade do gateway
