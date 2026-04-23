@@ -1,1 +1,3 @@
 .idea
+tests/performance/results/latest-summary.json
+tests/performance/results/latest-summary.txt

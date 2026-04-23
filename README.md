@@ -569,3 +569,197 @@ Resultado esperado:
 - para produção, ajuste `MANAGEMENT_TRACING_SAMPLING_PROBABILITY` para reduzir custo de tracing
 - as credenciais padrão do Grafana são adequadas apenas para ambiente local de desenvolvimento
 - a validação ponta a ponta confirmada neste repositório cobre `métricas` em todos os serviços, `logs centralizados` no Loki e `traces` confirmados no `gateway-server`; os serviços Spring Boot `4.0.x` ainda exigem alinhamento adicional para exportar spans downstream ao Zipkin com a mesma confiabilidade do gateway
+
+## 12) Testes de carga com k6
+
+O repositório agora inclui uma suíte simples de carga em `tests/performance` para exercitar todos os endpoints públicos do gateway e correlacionar os resultados com `Prometheus` e `Grafana`.
+
+### O que a suíte cobre
+
+- Products: `GET /api/v1/products`, `GET /api/v1/products/{id}`, `POST /api/v1/products`, `POST /api/v1/products/purchase`
+- Customers: `GET /api/v1/customers`, `GET /api/v1/customers/{id}`, `GET /api/v1/customers/exists/{id}`, `POST /api/v1/customers`, `PUT /api/v1/customers`, `DELETE /api/v1/customers/{id}`
+- Orders: `POST /api/v1/orders`, `GET /api/v1/orders`, `GET /api/v1/orders/{id}`, `GET /api/v1/order-lines/order/{orderId}`
+- Payments: `POST /api/v1/payments`
+
+### Pré-requisitos para carga
+
+- stack completa no ar com `docker compose up -d --build`
+- bootstrap do Keycloak executado conforme a seção 3
+- `Prometheus` e `Grafana` ativos na stack local
+- uma das opções abaixo para rodar o `k6`:
+  - `k6` instalado localmente
+  - Docker disponível para usar a imagem `grafana/k6`
+
+Observação: o `Prometheus` desta stack já está configurado com `remote write receiver`, permitindo que o `k6` envie métricas em tempo real para o Grafana local.
+
+### 1. Suba o ambiente
+
+```bash
+docker compose up -d --build
+docker compose ps
+```
+
+Valide os componentes principais:
+
+```bash
+curl -sS http://localhost:9090/-/ready
+curl -sS http://localhost:3100/ready
+curl -sS http://localhost:9411/health
+```
+
+### 2. Execute o bootstrap do Keycloak
+
+Se ainda não executou o bootstrap deste ambiente, rode a seção 3 deste README antes do teste de carga.
+
+### 3. Escolha como rodar o k6
+
+Opção A, com `k6` instalado localmente:
+
+```bash
+./tests/performance/run-local.sh
+```
+
+Opção B, usando Docker:
+
+```bash
+./tests/performance/run-docker.sh
+```
+
+Ao final, o runner imprime um `testid`. Exemplo:
+
+```text
+testid=local-20260422-231500
+```
+
+Use esse valor para filtrar o dashboard no Grafana.
+
+### 4. Ajuste de carga, se necessário
+
+Os cenários sobem com taxas conservadoras para ambiente local:
+
+- `PRODUCTS_RATE=4`
+- `CUSTOMERS_RATE=2`
+- `ORDERS_RATE=2`
+- `PAYMENTS_RATE=2`
+- `RAMP_UP=30s`
+- `STEADY_STATE=3m`
+- `RAMP_DOWN=30s`
+
+Exemplo com carga maior:
+
+```bash
+PRODUCTS_RATE=8 \
+CUSTOMERS_RATE=4 \
+ORDERS_RATE=3 \
+PAYMENTS_RATE=3 \
+STEADY_STATE=5m \
+TEST_TYPE=load \
+./tests/performance/run-local.sh
+```
+
+### 5. Verificar os resultados do k6
+
+O `k6` mostra no terminal o resumo com métricas como:
+
+- `avg response time`
+- `p95`
+- `p99`
+- `http_req_failed`
+- `http_reqs`
+- `checks`
+
+Além da saída no terminal, a suíte grava:
+
+```text
+tests/performance/results/latest-summary.json
+tests/performance/results/latest-summary.txt
+```
+
+Esses arquivos permitem registrar o baseline local de cada execução.
+
+### 6. Verificar os resultados no Grafana
+
+Abra `http://localhost:3000` e faça login com `admin` / `admin`.
+
+Dashboards relevantes:
+
+- `Dashboards > Observability > Load Testing Overview`
+- `Dashboards > Observability > Microservices Overview`
+
+No dashboard `Load Testing Overview`, filtre pelo `testid` da execução.
+
+Você verá, entre outros painéis:
+
+- `k6 Total Requests`
+- `k6 Peak RPS`
+- `k6 Avg Response`
+- `k6 P99 Response`
+- `k6 Request Rate by Scenario`
+- `k6 Response Time by Scenario`
+- `Application RPS by Service`
+- `Application Latency by Service`
+- `k6 Endpoint Summary`
+
+Interpretação prática:
+
+- `k6 Peak RPS`: pico de throughput gerado pelo teste
+- `k6 Avg Response`: latência média percebida pelo cliente de carga
+- `k6 P99 Response`: cauda de latência; útil para detectar degradação em piores casos
+- `Application RPS by Service`: distribuição da carga entre gateway e microserviços
+- `Application Latency by Service`: ajuda a identificar o serviço que virou gargalo
+
+### 7. Verificar no Prometheus
+
+Abra `http://localhost:9090` e rode consultas como:
+
+RPS por serviço:
+
+```promql
+sum by (application) (rate(http_server_requests_seconds_count{application!=""}[1m]))
+```
+
+P99 por serviço:
+
+```promql
+histogram_quantile(0.99, sum by (le, application) (rate(http_server_requests_seconds_bucket{application!=""}[5m])))
+```
+
+Latência média por serviço:
+
+```promql
+sum by (application) (rate(http_server_requests_seconds_sum{application!=""}[5m]))
+/
+sum by (application) (rate(http_server_requests_seconds_count{application!=""}[5m]))
+```
+
+RPS do k6 por cenário:
+
+```promql
+sum by (scenario) (rate(k6_http_reqs_total{testid="<TEST_ID>"}[1m]))
+```
+
+P99 do k6 por cenário:
+
+```promql
+avg by (scenario) (k6_http_req_duration_p99{testid="<TEST_ID>"})
+```
+
+Latência média do k6 por cenário:
+
+```promql
+avg by (scenario) (k6_http_req_duration_avg{testid="<TEST_ID>"})
+```
+
+### 8. Onde ajustar a suíte
+
+- script principal: `tests/performance/k6/main.js`
+- cenários: `tests/performance/k6/scenarios`
+- configuração de taxas e duração: `tests/performance/k6/config.js`
+- documentação local da suíte: `tests/performance/README.md`
+
+### 9. Observações operacionais
+
+- os cenários criam dados de apoio no `setup()` para reduzir flakiness em ambiente local
+- o token OAuth2 é renovado automaticamente durante a execução para evitar falha por expiração em testes mais longos
+- por padrão, o teste é conservador e serve como baseline local; não trate esses números como capacidade de produção
+- se quiser comparar execuções diferentes no Grafana, rode cada teste com um `testid` distinto
