@@ -39,11 +39,13 @@ services:
 
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:v2.53.3
+    image: prom/prometheus:v2.47.0
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
       - --web.enable-lifecycle
+      - --web.enable-remote-write-receiver
+      - --enable-feature=native-histograms
     ports:
       - "9090:9090"
     volumes:
