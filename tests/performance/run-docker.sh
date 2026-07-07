@@ -10,7 +10,12 @@ mkdir -p "$RESULTS_DIR"
 TEST_ID=${TEST_ID:-docker-$(date +%Y%m%d-%H%M%S)}
 export K6_PROMETHEUS_RW_SERVER_URL=${K6_PROMETHEUS_RW_SERVER_URL:-http://localhost:9090/api/v1/write}
 export K6_PROMETHEUS_RW_TREND_STATS=${K6_PROMETHEUS_RW_TREND_STATS:-p(95),p(99),avg,max}
-export K6_PROMETHEUS_RW_STALE_MARKERS=${K6_PROMETHEUS_RW_STALE_MARKERS:-true}
+export K6_PROMETHEUS_RW_STALE_MARKERS=${K6_PROMETHEUS_RW_STALE_MARKERS:-false}
+export K6_PROMETHEUS_RW_PUSH_INTERVAL=${K6_PROMETHEUS_RW_PUSH_INTERVAL:-10s}
+export K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=${K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM:-false}
+export K6_SUMMARY_DIR=/work/tests/performance/results
+
+"$SCRIPT_DIR/preflight.sh"
 
 docker run --rm \
   --network host \
@@ -18,6 +23,9 @@ docker run --rm \
   -e K6_PROMETHEUS_RW_SERVER_URL \
   -e K6_PROMETHEUS_RW_TREND_STATS \
   -e K6_PROMETHEUS_RW_STALE_MARKERS \
+  -e K6_PROMETHEUS_RW_PUSH_INTERVAL \
+  -e K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM \
+  -e K6_SUMMARY_DIR \
   -e GATEWAY_BASE_URL \
   -e AUTH_BASE_URL \
   -e OAUTH_REALM \
@@ -38,7 +46,7 @@ docker run --rm \
   -e TEST_TYPE \
   -v "$ROOT_DIR:/work" \
   -w /work \
-  grafana/k6:0.49.0 run \
+  grafana/k6:0.55.0 run \
   --tag testid="$TEST_ID" \
   -o experimental-prometheus-rw \
   tests/performance/k6/main.js

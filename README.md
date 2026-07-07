@@ -591,6 +591,7 @@ O repositório agora inclui uma suíte simples de carga em `tests/performance` p
   - Docker disponível para usar a imagem `grafana/k6`
 
 Observação: o `Prometheus` desta stack já está configurado com `remote write receiver`, permitindo que o `k6` envie métricas em tempo real para o Grafana local.
+O runner agora faz um preflight antes de iniciar a carga, validando `Prometheus`, `Keycloak`, `gateway` e um smoke autenticado em `GET /api/v1/products`.
 
 ### 1. Suba o ambiente
 
@@ -606,6 +607,8 @@ curl -sS http://localhost:9090/-/ready
 curl -sS http://localhost:3100/ready
 curl -sS http://localhost:9411/health
 ```
+
+Observação: após um `docker compose up -d --build`, ainda pode levar alguns segundos para `gateway` e `Keycloak` estabilizarem. Os runners de carga esperam automaticamente por essa prontidão.
 
 ### 2. Execute o bootstrap do Keycloak
 
@@ -632,6 +635,8 @@ testid=local-20260422-231500
 ```
 
 Use esse valor para filtrar o dashboard no Grafana.
+
+Se o bootstrap do Keycloak ainda não tiver sido executado, o runner falha cedo no preflight com uma mensagem explícita em vez de começar um teste inválido.
 
 ### 4. Ajuste de carga, se necessário
 
@@ -755,6 +760,7 @@ avg by (scenario) (k6_http_req_duration_avg{testid="<TEST_ID>"})
 - script principal: `tests/performance/k6/main.js`
 - cenários: `tests/performance/k6/scenarios`
 - configuração de taxas e duração: `tests/performance/k6/config.js`
+- preflight do ambiente: `tests/performance/preflight.sh`
 - documentação local da suíte: `tests/performance/README.md`
 
 ### 9. Observações operacionais
@@ -763,3 +769,19 @@ avg by (scenario) (k6_http_req_duration_avg{testid="<TEST_ID>"})
 - o token OAuth2 é renovado automaticamente durante a execução para evitar falha por expiração em testes mais longos
 - por padrão, o teste é conservador e serve como baseline local; não trate esses números como capacidade de produção
 - se quiser comparar execuções diferentes no Grafana, rode cada teste com um `testid` distinto
+- os runners usam `K6_PROMETHEUS_RW_PUSH_INTERVAL=10s` e mantêm `K6_PROMETHEUS_RW_STALE_MARKERS=false` por padrão para reduzir instabilidade no remote write local
+
+### 10. Troubleshooting específico do k6
+
+- `503 Service Unavailable` logo no começo do teste: normalmente a malha ainda não estabilizou ou o bootstrap do Keycloak não foi executado; rode a seção 3 deste README e tente novamente.
+- `Failed to send the time series data to the endpoint` com `status code: 400`: em ambiente local isso costuma indicar que o TSDB do Prometheus ficou contaminado por uma execução anterior interrompida ou com timestamps inválidos.
+
+Para recriar apenas o volume do Prometheus e voltar a um estado limpo:
+
+```bash
+docker compose rm -sf prometheus
+docker volume rm e-commerce-micro-services_prometheus-data
+docker compose up -d prometheus
+```
+
+Depois valide os targets novamente em `http://localhost:9090/targets` antes de rerodar o `k6`.

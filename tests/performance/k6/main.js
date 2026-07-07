@@ -126,6 +126,7 @@ export function setup() {
 export { runProductsScenario, runCustomersScenario, runOrdersScenario, runPaymentsScenario };
 
 export function handleSummary(data) {
+  const summaryDir = __ENV.K6_SUMMARY_DIR || 'tests/performance/results';
   const metrics = data && data.metrics ? data.metrics : {};
   const httpDuration = metrics.http_req_duration && metrics.http_req_duration.values ? metrics.http_req_duration.values : {};
   const checks = metrics.checks && metrics.checks.values ? metrics.checks.values : {};
@@ -158,7 +159,7 @@ export function handleSummary(data) {
 
   return {
     stdout: `${lines.join('\n')}\n`,
-    'tests/performance/results/latest-summary.json': JSON.stringify(data, null, 2),
-    'tests/performance/results/latest-summary.txt': `${lines.join('\n')}\n`,
+    [`${summaryDir}/latest-summary.json`]: JSON.stringify(data, null, 2),
+    [`${summaryDir}/latest-summary.txt`]: `${lines.join('\n')}\n`,
   };
 }
