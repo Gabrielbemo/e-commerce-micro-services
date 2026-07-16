@@ -628,6 +628,18 @@ Opção B, usando Docker:
 ./tests/performance/run-docker.sh
 ```
 
+Para rodar apenas a carga do domínio de customer:
+
+```bash
+./tests/performance/run-customer-local.sh
+```
+
+Ou, com o perfil mais forte de customer:
+
+```bash
+CUSTOMER_PROFILE=capacity ./tests/performance/run-customer-local.sh
+```
+
 Ao final, o runner imprime um `testid`. Exemplo:
 
 ```text
@@ -689,6 +701,7 @@ Abra `http://localhost:3000` e faça login com `admin` / `admin`.
 Dashboards relevantes:
 
 - `Dashboards > Observability > Load Testing Overview`
+- `Dashboards > Observability > Customer Load Overview`
 - `Dashboards > Observability > Microservices Overview`
 
 No dashboard `Load Testing Overview`, filtre pelo `testid` da execução.
@@ -758,6 +771,7 @@ avg by (scenario) (k6_http_req_duration_avg{testid="<TEST_ID>"})
 ### 8. Onde ajustar a suíte
 
 - script principal: `tests/performance/k6/main.js`
+- script principal de customer: `tests/performance/k6/customer-main.js`
 - cenários: `tests/performance/k6/scenarios`
 - configuração de taxas e duração: `tests/performance/k6/config.js`
 - preflight do ambiente: `tests/performance/preflight.sh`
